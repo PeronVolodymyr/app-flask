@@ -4,33 +4,34 @@ from locust import HttpLocust, TaskSet, between, task
 class UserBehavior(TaskSet):
 
     @task(1)
-    def get_calls(self):
-        self.client.get('/words')
+    def get_students(self):
+        self.client.get('/api/students')
 
     @task(1)
-    def get_word(self):
-        self.client.get('/word/1')
+    def get_student(self):
+        self.client.get('/api/students/1')
 
     @task(2)
-    def create_word(self):
+    def create_student(self):
         payload = {
-            "word": "hello",
-            "translation": "привіт",
+            'name': 'Petr Petrov',
+            'chair': 'IFTKN',
+            'group': 223
         }
-        self.client.post('/words', json=payload)
+        self.client.post('/api/students', json=payload)
 
     @task(2)
-    def update_task(self):
+    def update_student(self):
         payload = {
-            "word": "hello",
-            "translation": "привіт",
-            "done": "True",
+            'name': 'Volodymyr Peron upd',
+            'chair': 'IFTKN upd',
+            'group': 543
         }
-        self.client.put('/words/1', json=payload)
+        self.client.put('/api/students/1', json=payload)
 
     @task(2)
-    def delete_word(self):
-        self.client.delete('/words/2')
+    def delete_student(self):
+        self.client.delete('/api/students/2')
 
 
 class WebsiteUser(HttpLocust):

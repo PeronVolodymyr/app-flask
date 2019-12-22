@@ -1,84 +1,58 @@
-from flask import Flask, jsonify, abort, make_response, request
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-dictionary = [
+
+students = [
     {
         'id': 1,
-        'word': u'table',
-        'translation': u'стіл',
-        'done': False
+        'name': 'Volodymyr Peron',
+        'chair': 'IFTKN',
+        'group': 443
     },
     {
         'id': 2,
-        'word': u'chair',
-        'translation': u'крісло',
-        'done': False
+        'name': 'Ivan Ivanov',
+        'chair': 'Computer Science',
+        'group': 223
     }
 ]
 
 
-@app.route('/')
-def hello_world():
-    return 'Dictionary v2'
+@app.route('/api/students', methods=['GET'])
+def get_students():
+    return jsonify({'students': students})
 
+@app.route('/api/students/<int:student_id>', methods=['GET'])
+def get_student(student_id):
+    student = list(filter(lambda t: t['id'] == student_id, students))
+    return jsonify({'student': student[0]})
 
-@app.route('/words', methods=['GET'])
-def get_words():
-    return jsonify({'words': dictionary})
-
-
-@app.route('/word/<int:word_id>', methods=['GET'])
-def get_word(word_id):
-    word = list(filter(lambda t: t['id'] == word_id, dictionary))
-    if len(word) == 0:
-        abort(404)
-    return jsonify({'task': word[0]})
-
-
-@app.route('/words', methods=['POST'])
-def create_word():
-    word = {
-        'id': dictionary.__len__() + 1,
-        'word': request.json['word'],
-        'translation': request.json['translation'],
-        'done': False
+@app.route('/api/students', methods=['POST'])
+def create_student():
+    student = {
+        'id': students[-1]['id'] + 1,
+        'name': request.json['name'],
+        'chair': request.json['chair'],
+        'group': request.json['group']
     }
-    dictionary.append(word)
-    return jsonify({'words': dictionary}), 201
+    students.append(student)
+    return jsonify({'student': student}), 201
 
+@app.route('/api/students/<int:student_id>', methods=['PUT'])
+def update_student(student_id):
+    student = list(filter(lambda t: t['id'] == student_id, students))
+    student[0]['name'] = request.json.get('name', student[0]['name'])
+    student[0]['chair'] = request.json.get('chair', student[0]['chair'])
+    student[0]['group'] = request.json.get('group', student[0]['group'])
+    return jsonify({'student': student[0]})
 
-@app.route('/words/<int:word_id>', methods=['PUT'])
-def update_task(word_id):
-
-    for word in dictionary:
-        if word.get('id') == word_id:
-
-            print('word 1')
-            print(request.json['word'])
-
-            if request.json['word'] is not None:
-                word['word'] = str(request.json['word'])
-
-            if request.json['translation'] is not None:
-                word['translation'] = str(request.json['translation'])
-
-            if request.json['done'] is not None:
-                word['done'] = bool(request.json['done'])
-
+@app.route('/api/students/<int:student_id>', methods=['DELETE'])
+def delete_student(student_id):
+    for student in students:
+        if student.get('id') == student_id:
+            students.remove(student)
             return jsonify({'result': True})
-
-    return jsonify({'task': False})
-
-
-@app.route('/words/<int:word_id>', methods=['DELETE'])
-def delete_word(word_id):
-
-    for word in dictionary:
-        if word.get('id') == word_id:
-            dictionary.remove(word)
-            return jsonify({'result': True})
-
     return jsonify({'result': False})
 
 
